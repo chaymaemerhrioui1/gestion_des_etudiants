@@ -28,6 +28,9 @@ def login_user():
 def login_page():
     login_fenetre.destroy()
     import realacceuil
+def eservice():
+    login_fenetre.destroy()
+    import eservicehome
 def registr():
     login_fenetre.destroy()
     import registration
