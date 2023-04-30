@@ -25,6 +25,10 @@ def eservicehome_page():
 def clubs_page():
     w.destroy()
     import Clubs
+   
+def nous_page():
+    w.destroy()
+    import nouscontacter
 
 w = Tk()
 w.geometry('990x660')
@@ -76,6 +80,7 @@ def toggle_win():
     bttn(0, 150, 'CARTE ETUDIANT', 'grey', 'white', carte_page)
     bttn(0, 200, 'MARKSHEET', 'grey', 'white', marksheet_page)
     bttn(0, 250, 'Clubs', 'grey', 'white', clubs_page)
+    bttn(0, 300, 'Nous contactez', 'grey', 'white', nous_page)
 
     def dele():
         f1.destroy()
