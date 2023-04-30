@@ -1,19 +1,30 @@
 from tkinter import *  # importing all the modules and widgets from tkinter
 from tkinter import messagebox as mb  # importing the messagebox module from tkinter
+
+import messagebox
+import mysql.connector
 from PIL import ImageTk, Image, ImageDraw, \
 ImageFont  # importing the ImageTk, Image, ImageDraw and ImageFont modules from PIL
 
 #fct
 def marksheet_page():
     gui_root.destroy()
-    import eservicehome
+#   import eservicehome
 
 # defining a function to calculate the total
+
+
+
+
+
 def calculate_total(sub1, sub2, sub3, sub4, sub5):
     # adding all the arguments
     total = sub1 + sub2 + sub3 + sub4 + sub5
     # returning the total
     return total
+
+
+
 
 # defining a function to calculate the percentage
 def calculate_percentage(total):
@@ -21,6 +32,7 @@ def calculate_percentage(total):
     percentage = total / 5
     # returning the percentage
     return percentage
+
 
 # defining a function to calculate the grade
 def calculate_grade(percentage):
@@ -66,6 +78,93 @@ def check_for_errors():
     # defining a function to display the result
 
 
+def insert_notes(marks1, marks2, marks3, marks4, marks5, num_id):
+    try:
+        db = mysql.connector.connect(host='localhost', user='root')
+        mycursor = db.cursor()
+    except mysql.connector.Error:
+        messagebox.showerror('Error', 'Data Connectivity Issue. Please Try Again')
+        return
+
+    try:
+        query = 'CREATE DATABASE IF NOT EXISTS userdata'
+        mycursor.execute(query)
+        query = 'USE userdata'
+        mycursor.execute(query)
+        query = 'CREATE DATABASE IF NOT EXISTS userdata'
+        mycursor.execute(query)
+        query = 'USE userdata'
+        mycursor.execute(query)
+        query = ("""
+                    CREATE TABLE IF NOT EXISTS notes (
+                        id INT PRIMARY KEY AUTO_INCREMENT,
+                        note1 FLOAT NOT NULL,
+                        note2 FLOAT NOT NULL,
+                        note3 FLOAT NOT NULL,
+                        note4 FLOAT NOT NULL,
+                        note5 FLOAT NOT NULL,
+                        data_id INT NOT NULL,
+                        FOREIGN KEY (data_id) REFERENCES data(id)
+                    )
+                """)
+        mycursor.execute(query)
+    except mysql.connector.Error:
+        mycursor.execute('USE userdata')
+
+    try:
+        mycursor.execute("""
+            INSERT INTO notes (note1, note2, note3, note4, note5, data_id)
+            VALUES (%s, %s, %s, %s, %s, %s);
+        """, (marks1, marks2, marks3, marks4, marks5, num_id))
+
+        # Commit the changes to the database
+        db.commit()
+
+        # Print the number of rows affected by the query
+        print(mycursor.rowcount, "record inserted.")
+
+    except mysql.connector.Error:
+        messagebox.showerror('error', 'failed to execute the query')
+
+
+def save_results(total, percentage, grade, result, id):
+    try:
+        db = mysql.connector.connect(host='localhost', user='root')
+        mycursor = db.cursor()
+    except mysql.connector.Error:
+        messagebox.showerror('Error', 'Data Connectivity Issue. Please Try Again')
+        return
+
+    try:
+        query = ("""CREATE TABLE IF NOT EXISTS results (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total FLOAT(5),
+            percentage FLOAT(5),
+            grade VARCHAR(10), 
+            result VARCHAR(25),
+            FOREIGN KEY (data_id) REFERENCES data(id)
+            )""")
+        mycursor.execute(query)
+    except mysql.connector.Error:
+        mycursor.execute('USE userdata')
+        print('fail')
+
+    try:
+        mycursor.execute("""
+            INSERT INTO resultS (total, percentage, grade,result, data_id)
+            VALUES (%s, %s, %s, %s, %s, %s);
+        """, (total, percentage, grade, result, id))
+
+        # Commit the changes to the database
+        db.commit()
+
+        # Print the number of rows affected by the query
+        print(mycursor.rowcount, "record inserted.")
+
+    except mysql.connector.Error:
+        messagebox.showerror('error', 'failed to execute the query')
+
+
 def display_result():
     # using the get() method to get subject names
     sub1 = subject_One_field.get()
@@ -96,15 +195,18 @@ def display_result():
             marks4 = float(marks_Four_field.get())
             marks5 = float(marks_Five_field.get())
 
+
             # using the if-else conditional statement to check if the marks entered are valid and ranging in between 0 to 100
             if (
                     marks1 >= 0 and marks1 <= 20 and marks2 >= 0 and marks2 <= 20 and marks3 >= 0 and marks3 <= 20 and marks4 >= 0 and marks4 <= 20 and marks5 >= 0 and marks5 <= 20):
+                insert_notes(marks1,marks2,marks3,marks4,marks5,regd_num_field.get())
                 # calculating the result by calling the functions we created earlier and storing their values
                 total = calculate_total(marks1, marks2, marks3, marks4, marks5)
                 percentage = calculate_percentage(total)
                 grade = calculate_grade(percentage)
                 result = calculate_result(percentage, marks1, marks2, marks3, marks4, marks5)
 
+                save_results(total,percentage,grade,result, regd_num_field.get())
                 # setting the grade to 'F', if the result is 'FAIL'
                 if result == 'FAIL':
                     grade = 'F'
@@ -162,7 +264,7 @@ def generate_marksheet():
 
     # importing the image of a report card using
     # the open() method of the Image module
-    report_card_img = Image.open("Grand Total .png")
+    report_card_img = Image.open("C://Users//Salma Fannich//Downloads//REPORT-CARD_1.png")
     # using the Draw() class of the ImageDraw module
     # to make 2D drawing interface
     draw_obj = ImageDraw.Draw(report_card_img)
@@ -341,7 +443,7 @@ if __name__ == "__main__":
     gui_root.config(bg="#FCEEF6")
 
     # setting the icon of the application
-    gui_root.iconbitmap("t1.png")
+    gui_root.iconbitmap("close.png")
 
     # defining frames to provide structure to other widgets
     header_frame = Frame(gui_root, bg="#B05D8D")
@@ -363,7 +465,7 @@ if __name__ == "__main__":
 
     # ---------------------- The heading_frame Frame ----------------------
     # importing an image
-    the_image = ImageTk.PhotoImage(Image.open("t1.png"))
+    the_image = ImageTk.PhotoImage(Image.open("close.png").resize((50, 50), Image.ANTIALIAS))
 
     # adding some labels to display an image and heading of the application
     image_label = Label(heading_frame, image=the_image, bg="#B05D8D")
