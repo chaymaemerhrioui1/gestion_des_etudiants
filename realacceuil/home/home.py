@@ -64,13 +64,14 @@ news_items = [
     },
     {
         "title": "\n\n\n L'ENSA d'Al Hoceima abrite l'Entrepreneurial Exchange 1.0",
-        "image": "exchange-01.png"
+        "image": "exchang-01.png"
     },
     {
         "title":"\n\n\n\t Activité universale ",
-        "image": "activite-.png"
+        "image": "activity.png"
     }
 ]
+
 # Create the main window
 root = tk.Tk()
 root.geometry("990x660")
@@ -84,12 +85,12 @@ news_ticker.pack()
       bg="#12c4c0",anchor='e').pack(side=TOP,fill=X)"""
 
 l1 = Label(root, text='                                                                                                                               \n'
-                      ,fg='white', bg='#12c4cf')
+           ,fg='white', bg='#12c4cf')
 l1.config(font=('Arial', 22))
 l1.pack(expand=True)
 l1.place(x=0,y=0)
 
-bg1 = PhotoImage(file="C:/Users/pc/Downloads/images.png")
+bg1 = PhotoImage(file="t1.png")
 label1 = Label(root, image=bg1)
 label1.place(x=90,y=25)
 
