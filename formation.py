@@ -5,7 +5,7 @@ import tkinter as tk
 root=Tk()
 root.geometry('990x660')
 root.title('Formation')
-bg = PhotoImage(file="C:/Users/pc/Downloads/t1.png")
+bg = PhotoImage(file="t1.png")
 label1 = Label(root, image=bg)
 label1.place(x=0,y=0)
 
