@@ -2,6 +2,10 @@ import tkinter as tk
 from PIL import ImageTk, Image
 import webbrowser
 
+def nous():
+    root.destroy()
+    import eservicehome
+
 #Création de la fenêtre principale
 root = tk.Tk()
 root.geometry("600x600")
