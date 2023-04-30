@@ -56,22 +56,21 @@ class NewsTicker(tk.Frame):
 news_items = [
     {
         "title": "\n\n\n  Le Roi ouvert ENSAH en 2008 avec 50 MDH",
-        "image": "C:/Users/pc/Downloads/moinsuer-le-roi.png"
+        "image": "le-roi.png"
     },
     {
         "title": "\n\n\n  Sortie pedagogique par le culb génit civil ",
-        "image": "C:/Users/pc/Downloads/WhatsApp Image 2023-04-01 à 13.23.37.jpg"
+        "image": "genie-civil.png"
     },
     {
         "title": "\n\n\n L'ENSA d'Al Hoceima abrite l'Entrepreneurial Exchange 1.0",
-        "image": "C:/Users/pc/Downloads/exchange.png"
+        "image": "exchange-01.png"
     },
     {
         "title":"\n\n\n\t Activité universale ",
-        "image": "C:/Users/pc/Downloads/Capture d’écran 2023-04-01 132945.png"
+        "image": "activite-.png"
     }
 ]
-
 # Create the main window
 root = tk.Tk()
 root.geometry("990x660")
