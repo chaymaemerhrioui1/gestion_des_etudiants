@@ -90,7 +90,7 @@ l1.config(font=('Arial', 22))
 l1.pack(expand=True)
 l1.place(x=0,y=0)
 
-bg1 = PhotoImage(file="C:/Users/pc/Downloads/images.png")
+bg1 = PhotoImage(file="images.png")
 label1 = Label(root, image=bg1)
 label1.place(x=90,y=25)
 
