@@ -1,15 +1,20 @@
 import io
 from tkinter import *
 from datetime import date
-from tkinter import filedialog
+from tkinter import filedialog, simpledialog
 from tkinter import messagebox
 from PIL import ImageTk, Image
 import os
 from tkinter.ttk import Combobox
-import openpyxl, xlrd
+import openpyxl
 from openpyxl import Workbook
 import pathlib
 import mysql.connector
+
+from forgotID import forgot_my_id
+
+
+filenameOpened = False
 
 background = "#06283D"
 frambg = "#EDEDED"
@@ -36,12 +41,36 @@ def registr():
     import seconnecter
 
 
+def get_id_tab():
+    import tkinter as tk
+    root = tk.Tk()
+    root.geometry("200x100")
+
+    header = tk.Label(root, text="your code is incorrect, please verify code or id ", font=("Arial", 9))
+    header.pack(pady=20)
+
+    button_frame = tk.Frame(root)
+    button_frame.pack()
+
+    ok_button = tk.Button(button_frame, text="forgot my id -_-",
+                          command=lambda: [forgot_my_id(), root.destroy()])
+    ok_button.pack(side=tk.LEFT, padx=10)
+
+    cancel_button = tk.Button(button_frame, text="nah", command=lambda: [messagebox.showinfo("pressed nah",
+                                                                                             "then try again"),
+                                                                                              root.destroy()])
+    cancel_button.pack(side=tk.LEFT, padx=10)
+
+    root.mainloop()
+
 # show image
 def showimage():
     global filename
     global img
     filename = filedialog.askopenfilename(initialdir=os.getcwd(), title="Choisir une image", filetype=(
     ("JPG File", "*.jpg"), ("PNG File", "*.png"), ("All files", "*.txt")))
+    global filenameOpened
+    filenameOpened= True
     img = (Image.open(filename))
     resized_image = img.resize((190, 190))
     photo2 = ImageTk.PhotoImage(resized_image)
@@ -84,6 +113,36 @@ def clear():
 
 
 ############save############
+def verif(num):
+    try:
+        db = mysql.connector.connect(host='localhost', user='root', database='userdata')
+        mycursor = db.cursor()
+    except mysql.connector.Error:
+        messagebox.showerror('Error', 'Data Connectivity Issue. Please Try Again')
+        return
+    query = 'select password from data where id = %s'
+    mycursor.execute(query, (num,))
+    row = mycursor.fetchone()
+
+    while True:
+        if row == None:
+            messagebox.showerror('Error', 'invalid ID number')
+            get_id_tab()
+
+        else:
+            code = simpledialog.askstring(title="data input vaerification",
+                                           prompt="to assure that your are making modifications in your zone, Please enter your code:")
+            print(code)
+            if code is None:
+                break
+            elif code == str(row[0]):
+                print(f'{code} and {row} match')
+                return 1
+            else:
+                get_id_tab()
+
+
+
 def save():
     R1 = Registration.get()
     N1 = Nom.get()
@@ -106,7 +165,9 @@ def save():
     else:
 
         R1 = Registration.get()
-        N1 = Nom.get()
+        N1 = Nom.get().strip()
+        nom = N1.split('_')[0]
+        prenom = N1.split('_')[1]
         C1 = Class.get().strip()
         selection()
         G1 = genre
@@ -118,58 +179,67 @@ def save():
         nommere = m_name.get().strip()
         travailm = m_occupation.get().strip()
         img_variable = img
-        img_variable.show()
+        #img_variable.show()
 
-        try:
-            db = mysql.connector.connect(host='localhost', user='root', database='userdata')
-            mycursor = db.cursor()
-        except mysql.connector.Error:
-            messagebox.showerror('Error', 'Data Connectivity Issue. Please Try Again')
-            return
-        try:
-            q1 = ['date_naissance date', 'genre varchar(10)', 'class varchar(15)', 'nationalite varchar(15)',
-                  'bacaloreat varchar(20)', 'nom_pere varchar(50)', 'travaille_pere varchar(50)',
-                  'nom_mere varchar(50)', 'travaille_mere varchar(50)', 'image longblob']
+        # if the user wants to commit changes in his form
+        if verif(R1)==1:
 
-            query = 'CREATE DATABASE IF NOT EXISTS userdata'
-            mycursor.execute(query)
-            query = 'USE userdata'
-            mycursor.execute(query)
 
-            for i in range(len(q1)):
-                query = (f'''ALTER TABLE data
-                   ADD {q1[i]} NULL''')
+            try:
+                db = mysql.connector.connect(host='localhost', user='root', database='userdata')
+                mycursor = db.cursor()
+            except mysql.connector.Error:
+                messagebox.showerror('Error', 'Data Connectivity Issue. Please Try Again')
+                return
+            try:
+                q1 = ['date_naissance date', 'genre varchar(10)', 'class varchar(15)', 'nationalite varchar(15)',
+                      'bacaloreat varchar(20)', 'nom_pere varchar(50)', 'travaille_pere varchar(50)',
+                      'nom_mere varchar(50)', 'travaille_mere varchar(50)', 'image longblob']
+
+                query = 'CREATE DATABASE IF NOT EXISTS userdata'
                 mycursor.execute(query)
-        except mysql.connector.Error:
-            mycursor.execute('USE userdata')
+                query = 'USE userdata'
+                mycursor.execute(query)
 
-        sql = ("UPDATE data "
-               f"set  date_naissance= '{D1}', genre='{G1}', class='{C1}', bacaloreat='{Re}',nationalite='{S1}', nom_pere='{nompere}', travaille_pere='{travailp}', nom_mere='{nommere}', travaille_mere= '{travailm}' "
-               f"where id = {R1}")
+                for i in range(len(q1)):
+                    query = (f'''ALTER TABLE data
+                       ADD {q1[i]} NULL''')
+                    mycursor.execute(query)
+            except mysql.connector.Error:
+                mycursor.execute('USE userdata')
 
-        mycursor.execute(sql)
-        db.commit()
+            sql = ("UPDATE data "
+                   f"set  first_name='{nom}', last_name='{prenom}', date_naissance= '{D1}', genre='{G1}', class='{C1}', bacaloreat='{Re}',nationalite='{S1}', nom_pere='{nompere}', travaille_pere='{travailp}', nom_mere='{nommere}', travaille_mere= '{travailm}' "
+                   f"where id = {R1}")
+
+            mycursor.execute(sql)
+            db.commit()
+        else:
+            import tkinter as tk
+            root = tk.Tk()
+            root.withdraw()  # Hide the root window
+
+            messagebox.showinfo("Message", "Your modification wasn't committed -_-")
 
         #    img_data= img.read()
 
-        subdir = 'images'
-
-        # Construct output directory path
-        output_dir = os.path.join(os.getcwd(), subdir)
-
-        # Create output director
-
+        if (not filenameOpened):
+            import tkinter as tk
+            root = tk.Tk()
+            root.withdraw()  # Hide the root window
+            messagebox.Message("you haven't uploaded a picture -_- however your changes have been committed.")
         # Convert binary data to MySQL binary format
-        with open(filename, "rb") as f:
+        else:
+            with open(filename, "rb") as f:
 
-            imgg = Image.open(f)
-            imgg_byte = imgg.tobytes()
+                imgg = Image.open(f)
+                imgg_byte = imgg.tobytes()
 
-        query = f'''UPDATE data 
-                set image=(%s)
-                where id= {R1}'''
-        mycursor.execute(query, (imgg_byte,))
-        db.commit()
+            query = f'''UPDATE data 
+                    set image=(%s)
+                    where id= {R1}'''
+            mycursor.execute(query, (imgg_byte,))
+            db.commit()
 
 
 # search """"""""""""""
@@ -181,6 +251,7 @@ def chercher():
     try:
         db = mysql.connector.connect(host='localhost', user='root', database='userdata')
         mycursor = db.cursor()
+
     except mysql.connector.Error:
         messagebox.showerror('Error', 'Data Connectivity Issue. Please Try Again')
         return
@@ -226,6 +297,8 @@ def update():
 
     R1 = Registration.get()
     N1 = Nom.get()
+    nom = N1.split('_')[0]
+    prenom = N1.split('_')[1]
     C1 = Class.get()
     selection()
     G1 = genre
@@ -256,7 +329,7 @@ def update():
         mycursor.execute('USE userdata')
 
     sql = ("UPDATE data "
-           f"set  date_naissance= {D1}, genre='{G1}', class='{C1}', bacaloreat='{Re}',nationalite='{S1}', nom_pere='{nompere}', travaille_pere='{travailp}', nom_mere='{nommere}', travaille_mere'{travailm}'"
+           f"set  first_name='{nom}', last_name='{prenom}', date_naissance= '{D1}', genre='{G1}', class='{C1}', bacaloreat='{Re}',nationalite='{S1}', nom_pere='{nompere}', travaille_pere='{travailp}', nom_mere='{nommere}', travaille_mere= '{travailm}' "
            f"where id = {R1}")
 
     mycursor.execute(sql)
@@ -306,7 +379,7 @@ reg_entry.place(x=160, y=150)
 registration_no()
 
 today = date.today()
-d1 = today.strftime("%d/%m/%Y")
+d1 = today.strftime("%Y/%m/%d")
 date_entry = Entry(regi, textvariable=Date, width=15, font="arial 10")
 date_entry.place(x=550, y=150)
 Date.set(d1)
@@ -326,10 +399,12 @@ Label(obj, text="Nationalité ", font="arial 13", bg=frambg, fg=framfg).place(x=
 
 Nom = StringVar()
 name_entry = Entry(obj, textvariable=Nom, width=20, font="arial 10")
+name_entry.insert(0,"example: Chadi_Mountassir")
 name_entry.place(x=175, y=50)
 
 Date_naissance = StringVar()
 Date_naissance_entry = Entry(obj, textvariable=Date_naissance, width=20, font="arial 10")
+Date_naissance_entry.insert(0,"2002/07/26")
 Date_naissance_entry.place(x=175, y=100)
 
 radio = IntVar()
