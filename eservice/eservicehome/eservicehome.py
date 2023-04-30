@@ -40,7 +40,7 @@ l1 = Label(w, text='Bienvenue  !\n'
                    'des sciences appliquée Al hoceima ', fg='white', bg='#262626')
 l1.config(font=('Arial', 30))
 l1.pack(expand=True)
-l1.place(x=200,y=250)
+l1.place(x=235,y=250)
 
 
 def toggle_win():
