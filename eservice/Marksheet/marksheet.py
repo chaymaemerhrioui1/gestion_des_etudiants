@@ -443,7 +443,7 @@ if __name__ == "__main__":
     gui_root.config(bg="#FCEEF6")
 
     # setting the icon of the application
-    gui_root.iconbitmap("close.png")
+    gui_root.iconbitmap("Grand Total.png")
 
     # defining frames to provide structure to other widgets
     header_frame = Frame(gui_root, bg="#B05D8D")
